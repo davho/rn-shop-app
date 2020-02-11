@@ -8,6 +8,8 @@
 
 //Note: enableScreens from 'react-native-screens' (it used to be called useScreens) is a package you download when you import react-navigation and the rest and it makes use of the native screen animations for better navigation performance. To use it simply import it into App.js and then call it before your App.js component. THIS MAKE NAVIGATION NOTICEABLY MORE PERFORMANT
 
+//SIDE NOTE for 'swipe to delete react native': https://www.npmjs.com/package/react-native-swipeout   , or   https://www.npmjs.com/package/react-native-swipeable-row   are a good libraries to look at for swiping to delete stuff elements in a list like emails in gmail. Or from scratch: https://github.com/jemise111/react-native-swipe-list-view/blob/master/docs/swipe-to-delete.md
+
 
 import React, {useState} from 'react'
 

@@ -1,5 +1,10 @@
+//Note: Formik might be the package to use for beyond basic needs, it manages the state of your input fields in one useState hook without having to create useState hooks for each one    https://www.youtube.com/watch?v=t4Q1s8WntlA    https://www.youtube.com/watch?v=urzVC5Zr-JM
+
+
+//Note: For toggling through the TextInputs I adapted this approach for use in functional components   https://thekevinscott.com/tabbing-through-input-fields/   and the only issue is that I want the keyboardType for the Price TextInput to be 'decimal-pad' but that hides the returnKey thereby making toggling from that field to the next impossible. Nonetheless, I kept the returnKeyType='next' property there and gave the following field a ref={ input => {inputs['four'] = input}} just to illustrate how one could theoratically tab through as many fields as they like with this method.
+
 import React, { useState, useEffect } from 'react'
-import { View, ScrollView, Text, TextInput, StyleSheet, Alert } from 'react-native'
+import { View, ScrollView, Text, TextInput, StyleSheet, Alert, KeyboardAvoidingView } from 'react-native' //Don't forget to throw an inline style with flex:1 in your KeyboardAvoidingView so that it takes up all the available space on the screen, otherwise it would work at all
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import { useSelector, useDispatch } from 'react-redux'
 
@@ -60,33 +65,68 @@ const EditProductScreen = props => {
         props.navigation.setParams({editOrAdd: editOrAdd, dispatch: dispatch})
     },[dispatch, product, title, imageUrl, description, price])
 
-    return (
 
-        <ScrollView>
+    //This is my TextInput toggle approach for functional components
+    let inputs = []
+    const focusNextField = (key) => {
+        inputs[key].focus()
+    }
 
-            <View style={styles.form}>
-                <View style={styles.formControl}>
-                    <Text style={styles.label}>Title</Text>
-                    <TextInput style={styles.input} value={title} onChangeText={text => setTitle(text)}/>
+    return ( // Note the four inputs below might be able to be refactored into a reusable component which gets a label dynamically as well as some of the other differing properties. The only issue is the focusNextField() function that I wrote to toggle through the fields.
+
+        <KeyboardAvoidingView style={{flex: 1}} behavior='padding' keyboardVerticalOffset={100}>
+            <ScrollView>
+                <View style={styles.form}>
+                    <View style={styles.formControl}>
+                        <Text style={styles.label}>Title</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={title}
+                            onChangeText={text => setTitle(text)}
+                            onSubmitEditing={() => focusNextField('two')}
+                            returnKeyType='next'
+                            autoCapitalize='sentences'
+                            autoCorrect/>
+                    </View>
+
+                    <View style={styles.formControl}>
+                        <Text style={styles.label}>Image URL</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={imageUrl}
+                            onChangeText={text => setImageUrl(text)}
+                            ref={ input => {inputs['two'] = input}}
+                            onSubmitEditing={() => focusNextField('three')}
+                            returnKeyType='next'/>
+                    </View>
+
+                    <View style={styles.formControl}>
+                        <Text style={styles.label}>Price</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={price}
+                            onChangeText={text => setPrice(text)}
+                            ref={ input => {inputs['three'] = input}}
+                            onSubmitEditing={() => focusNextField('four')}
+                            keyboardType='decimal-pad'
+                            returnKeyType='next'/>
+                    </View>
+
+                    <View style={styles.formControl}>
+                        <Text style={styles.label}>Description</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={description}
+                            onChangeText={text => setDescription(text)}
+                            ref={ input => {inputs['four'] = input}}
+                            onSubmitEditing={() => editOrAdd()}
+                            returnKeyType='done'
+                            multiline
+                            />
+                    </View>
                 </View>
-
-                <View style={styles.formControl}>
-                    <Text style={styles.label}>Image URL</Text>
-                    <TextInput style={styles.input} value={imageUrl} onChangeText={text => setImageUrl(text)}/>
-                </View>
-
-                <View style={styles.formControl}>
-                    <Text style={styles.label}>Price</Text>
-                    <TextInput style={styles.input} value={price} onChangeText={text => setPrice(text)}/>
-                </View>
-
-                <View style={styles.formControl}>
-                    <Text style={styles.label}>Description</Text>
-                    <TextInput style={styles.input} value={description} onChangeText={text => setDescription(text)}/>
-                </View>
-            </View>
-
-        </ScrollView>
+            </ScrollView>
+        </KeyboardAvoidingView>
 
     )
 }
@@ -98,7 +138,7 @@ EditProductScreen.navigationOptions = navData => {
     return (
         {
             headerTitle: navData.navigation.getParam('id') ? 'Edit Product' : 'Add Product',
-            headerRight: <HeaderButtons HeaderButtonComponent={HeaderButton}>
+            headerRight: () => <HeaderButtons HeaderButtonComponent={HeaderButton}>
                 <Item title='Save' iconName='md-checkmark' onPress={() => editOrAdd()}/>
             </HeaderButtons>
         }

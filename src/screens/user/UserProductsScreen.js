@@ -59,10 +59,10 @@ UserProductsScreen.navigationOptions = navData => {
     return (
         {
             headerTitle: 'Your Products',
-            headerLeft: <HeaderButtons HeaderButtonComponent={HeaderButton}>
+            headerLeft: () => <HeaderButtons HeaderButtonComponent={HeaderButton}>
                 <Item title='Cart' iconName='md-menu' onPress={() => navData.navigation.toggleDrawer()}/>
             </HeaderButtons>,
-            headerRight: <HeaderButtons HeaderButtonComponent={HeaderButton}>
+            headerRight: () => <HeaderButtons HeaderButtonComponent={HeaderButton}>
                 <Item title='Cart' iconName='md-create' onPress={() => navData.navigation.navigate('EditProduct')}/>
             </HeaderButtons>
         }
