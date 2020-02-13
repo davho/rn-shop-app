@@ -4,13 +4,15 @@
 //Note: For toggling through the TextInputs I adapted this approach for use in functional components   https://thekevinscott.com/tabbing-through-input-fields/   and the only issue is that I want the keyboardType for the Price TextInput to be 'decimal-pad' but that hides the returnKey thereby making toggling from that field to the next impossible. Nonetheless, I kept the returnKeyType='next' property there and gave the following field a ref={ input => {inputs['four'] = input}} just to illustrate how one could theoratically tab through as many fields as they like with this method.
 
 import React, { useState, useEffect } from 'react'
-import { View, ScrollView, Text, TextInput, StyleSheet, Alert, KeyboardAvoidingView } from 'react-native' //Don't forget to throw an inline style with flex:1 in your KeyboardAvoidingView so that it takes up all the available space on the screen, otherwise it would work at all
+import { View, ScrollView, Text, TextInput, StyleSheet, Alert, KeyboardAvoidingView, ActivityIndicator } from 'react-native' //Don't forget to throw an inline style with flex:1 in your KeyboardAvoidingView so that it takes up all the available space on the screen, otherwise it would work at all
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
 import { useSelector, useDispatch } from 'react-redux'
 
 import HeaderButton from '../../components/UI/HeaderButton'
 
 import * as productsActions from '../../store/actions/products'
+
+import Colors from '../../constants/Colors'
 
 const EditProductScreen = props => {
 
@@ -21,41 +23,56 @@ const EditProductScreen = props => {
     const [price, setPrice] = useState(props.navigation.getParam('id') ? product.price.toString() : '')
     const [description, setDescription] = useState(props.navigation.getParam('id') ? product.description : '')
 
-    dispatch = useDispatch()
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState() //leaving useState() empty as such just initializes it as undefined
 
-    const editOrAdd = () => {
-        if (product) {
-            Alert.alert(
-              'Wait...',
-              'Are you sure you want to edit this item?',
-              [
-                {
-                  text: 'Cancel',
-                  style: 'destructive',
-                  onPress: () => console.log('Cancel Pressed'),
-                  style: 'cancel',
-                },
-                {text: 'OK',
-                style: 'destructive',
-                onPress: () => {dispatch(productsActions.editProduct(product.id, title, imageUrl, description, +price)); props.navigation.goBack()}}
-              ],
-              {cancelable: false},
-            )
-        } else {
-            Alert.alert(
-              'Wait...',
-              'Are you sure you want to add this item?',
-              [
-                {
-                  text: 'Cancel',
-                  style: 'destructive',
-                  onPress: () => console.log('Cancel Pressed'),
-                  style: 'cancel',
-                },
-                {text: 'OK', style: 'destructive', onPress: () => {dispatch(productsActions.addProduct(title, imageUrl, description, +price)); props.navigation.goBack()}},
-              ],
-              {cancelable: false},
-            )
+    const dispatch = useDispatch()
+
+    const editOrAdd = async () => {
+
+        console.log(isLoading);
+
+        setError(null)
+        setIsLoading(true)
+
+        try {
+            if (product) {
+                await Alert.alert(
+                  'Wait...',
+                  'Are you sure you want to edit this item?',
+                  [
+                    {
+                      text: 'Cancel',
+                      style: 'destructive',
+                      onPress: () => console.log('Cancel Pressed'),
+                      style: 'cancel',
+                    },
+                    {text: 'OK',
+                    style: 'destructive',
+                    onPress: () => {dispatch(productsActions.editProduct(product.id, title, imageUrl, description, +price)); props.navigation.goBack()}}
+                  ],
+                  {cancelable: false},
+                )
+                setIsLoading(false)
+            } else {
+                await Alert.alert(
+                  'Wait...',
+                  'Are you sure you want to add this item?',
+                  [
+                    {
+                      text: 'Cancel',
+                      style: 'destructive',
+                      onPress: () => console.log('Cancel Pressed'),
+                      style: 'cancel',
+                    },
+                    {text: 'OK', style: 'destructive', onPress: () => {dispatch(productsActions.addProduct(title, imageUrl, description, +price)); props.navigation.goBack()}},
+                  ],
+                  {cancelable: false},
+                )
+                setIsLoading(false)
+            }
+        } catch (err) {
+            setError(err.message)
         }
     }
 
@@ -70,6 +87,14 @@ const EditProductScreen = props => {
     let inputs = []
     const focusNextField = (key) => {
         inputs[key].focus()
+    }
+
+    if (isLoading) {
+        return (
+            <View style={styles.centered}>
+                <ActivityIndicator size='large' color={Colors.primary} />
+            </View>
+        )
     }
 
     return ( // Note the four inputs below might be able to be refactored into a reusable component which gets a label dynamically as well as some of the other differing properties. The only issue is the focusNextField() function that I wrote to toggle through the fields.
@@ -161,6 +186,11 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
         borderBottomColor: '#ccc',
         borderBottomWidth: 1
+    },
+    centered: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center'
     }
 })
 

@@ -1,5 +1,5 @@
 import PRODUCTS from '../../data/dummy-data' //1) Here in the reducers for the products we need to import all the data we have so that we can have it in our initial state before we decide what to do with it in redux
-import { DELETE_PRODUCT, ADD_PRODUCT, EDIT_PRODUCT } from '../actions/products' //2)We also need to import our action files we use in the switch statements.
+import { DELETE_PRODUCT, ADD_PRODUCT, EDIT_PRODUCT, SET_PRODUCTS } from '../actions/products' //2)We also need to import our action files we use in the switch statements.
 
 import Product from '../../models/product'
 
@@ -20,9 +20,21 @@ const productsReducer = (state = initialState, action) => { //4) Now we create o
                 userProducts: state.userProducts.filter(product => product.id !== action.pid)
             }
 
+        case SET_PRODUCTS:
+            return {
+                availableProducts: action.products,
+                userProducts: action.products.filter(prod => prod.ownerId === 'u1')
+            }
+
         case ADD_PRODUCT:
 
-            const newProduct = new Product(new Date().getTime().toString(), 'u1', action.title, action.imageUrl, action.description, action.price)
+            const newProduct = new Product(
+                action.id,
+                'u1',
+                action.title,
+                action.imageUrl,
+                action.description,
+                action.price)
 
             return {
                 ...state,

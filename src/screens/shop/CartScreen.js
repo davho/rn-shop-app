@@ -1,5 +1,5 @@
-import React from 'react'
-import { View, Text, FlatList, StyleSheet, Button } from 'react-native'
+import React, {useState} from 'react'
+import { View, Text, FlatList, StyleSheet, Button, ActivityIndicator } from 'react-native'
 import { useSelector, useDispatch } from 'react-redux'
 import * as cartActions from '../../store/actions/cart'
 import * as ordersActions from '../../store/actions/orders'
@@ -9,6 +9,8 @@ import CartItem from '../../components/shop/CartItem'
 import Colors from '../../constants/Colors'
 
 const CartScreen = props => {
+    const [isLoading, setIsLoading] = useState(false)
+
     const cartTotalAmount = useSelector(state => state.cart.totalAmount)
     const cartItems = useSelector(state => { //We're just converting obejct to array in this below functio, because that makes it easier to use in the FlatList and also allows us to check if length === 0 which we need to know in order to display our 'Order Now' button or not. And the 'Order Now' button we can set the disabled prop.
         const transformedCartItems = []
@@ -27,16 +29,22 @@ const CartScreen = props => {
 
     const dispatch = useDispatch()
 
+    const addOrderHandler = async () => {
+        setIsLoading(true)
+        await dispatch(ordersActions.addOrder(cartItems, cartTotalAmount))
+        setIsLoading(false)
+    }
+
     return (
         <View style={styles.screen}>
             <View style={styles.summary}>
                 <Text style={styles.summaryText}>Total: <Text style={styles.amount}>${Math.abs(cartTotalAmount).toFixed(2)}</Text>
                 </Text>
-                <Button
+                { isLoading ? <ActivityIndicator size='small' color={Colors.primary}/> : <Button
                     color={Colors.accent}
                     title='Order Now'
                     disabled={cartItems.length === 0}
-                    onPress={() => dispatch(ordersActions.addOrder(cartItems, cartTotalAmount))}/>
+                    onPress={addOrderHandler}/> }
             </View>
             <View>
                 <FlatList
