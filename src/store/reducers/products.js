@@ -4,8 +4,8 @@ import { DELETE_PRODUCT, ADD_PRODUCT, EDIT_PRODUCT, SET_PRODUCTS } from '../acti
 import Product from '../../models/product'
 
 const initialState = { //3)Initialize the state object with availableProducts (which should be set to all the PRODUCTS) and userProducts (which should be set to all the PRODUCTS with a userId of u1, so we use the filter method to do that).
-    availableProducts: PRODUCTS,
-    userProducts: PRODUCTS.filter(prod => prod.ownerId === 'u1')
+    availableProducts: [],
+    userProducts: []
 }
 
 const productsReducer = (state = initialState, action) => { //4) Now we create our reducer which is just a function that takes two arguments, state and action, and the state should be set to the initial state.
@@ -23,14 +23,14 @@ const productsReducer = (state = initialState, action) => { //4) Now we create o
         case SET_PRODUCTS:
             return {
                 availableProducts: action.products,
-                userProducts: action.products.filter(prod => prod.ownerId === 'u1')
+                userProducts: action.userProducts
             }
 
         case ADD_PRODUCT:
 
             const newProduct = new Product(
-                action.id,
-                'u1',
+                action.id, //It has a problem with this
+                action.ownerId, //It has a problem with this
                 action.title,
                 action.imageUrl,
                 action.description,
@@ -39,7 +39,7 @@ const productsReducer = (state = initialState, action) => { //4) Now we create o
             return {
                 ...state,
                 availableProducts: state.availableProducts.concat(newProduct),
-                userProducts: state.availableProducts.concat(newProduct)
+                userProducts: state.userProducts.concat(newProduct)
             }
 
         case EDIT_PRODUCT:

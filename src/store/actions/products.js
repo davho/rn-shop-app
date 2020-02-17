@@ -9,7 +9,8 @@ export const SET_PRODUCTS = 'SET_PRODUCTS'
 export const fetchProducts = () => {
 
     try {
-        return async dispatch => {
+        return async (dispatch, getState) => {
+            const userId = getState().auth.userId
             //here you can execute any async code you want!
             const response = await fetch('https://rn-shop-app-e69b1.firebaseio.com/products.json') //the .json you have to add at the end is just a Firebase specific thing, and unlike our addProduct POST request, we don't even need the seconds argument in the fetch (the object with the method, header, and body)
 
@@ -22,12 +23,16 @@ export const fetchProducts = () => {
             const loadedProducts = []
 
                 for (const key in resData) { //The for...in statement iterates over all enumerable properties of an object that are keyed by strings
-                    loadedProducts.push(new Product(key, 'u1', resData[key].title, resData[key].imageUrl, resData[key].description, resData[key].price))
+                    loadedProducts.push(new Product(key, resData[key].ownerId, resData[key].title, resData[key].imageUrl, resData[key].description, resData[key].price))
                 }
+
+                //console.log(loadedProducts.filter(prod => prod.ownerId === userId))
+
 
             dispatch ({
                 type: SET_PRODUCTS,
-                products: loadedProducts
+                products: loadedProducts,
+                userProducts: loadedProducts.filter(prod => prod.ownerId === userId)
             })
         }
     } catch (err) {
@@ -39,8 +44,13 @@ export const fetchProducts = () => {
 
 export const deleteProduct = productId => {
 
-    return async dispatch => {
-        const response = await fetch(`https://rn-shop-app-e69b1.firebaseio.com/products/${productId}.json`, { //the .json you have to add at the end is just a Firebase specific thing
+    return async (dispatch, getState) => { //Not only do we get access to the dispatch function with thunk but we also get access to the state with the getState function
+
+        const token = getState().auth.token
+
+        //here you can execute any async code you want!
+
+        const response = await fetch(`https://rn-shop-app-e69b1.firebaseio.com/products/${productId}.json?auth=${token}`, { //the .json you have to add at the end is just a Firebase specific thing
             method: 'DELETE'
         })
 
@@ -48,14 +58,23 @@ export const deleteProduct = productId => {
             throw new Error('Something went wrong!')
         }
 
-        dispatch({ type: DELETE_PRODUCT, pid: productId })
+        dispatch({
+            type: DELETE_PRODUCT,
+            pid: productId
+        })
     }
 }
 
 export const addProduct = (title, imageUrl, description, price) => {
-    return async dispatch => {
+
+    return async (dispatch, getState) => { //Not only do we get access to the dispatch function with thunk but we also get access to the state with the getState function
+
+        const token = getState().auth.token
+        const userId = getState().auth.userId
+
         //here you can execute any async code you want!
-        const response = await fetch('https://rn-shop-app-e69b1.firebaseio.com/products.json', { //the .json you have to add at the end is just a Firebase specific thing
+
+        const response = await fetch(`https://rn-shop-app-e69b1.firebaseio.com/products.json?auth=${token}`, { //the .json you have to add at the end is just a Firebase specific thing
             method: 'POST',
             header: {
                 'Content-Type': 'application/json'
@@ -64,7 +83,8 @@ export const addProduct = (title, imageUrl, description, price) => {
                 title,
                 description,
                 imageUrl,
-                price
+                price,
+                ownerId: userId
             })
         })
 
@@ -76,17 +96,21 @@ export const addProduct = (title, imageUrl, description, price) => {
             imageUrl: imageUrl,
             description: description,
             price: price,
-            id: resData.name
+            id: resData.name,
+            ownerId: userId
         })
     }
-
 }
 
 export const editProduct = (id, title, imageUrl, description, price) => {
 
-    return async dispatch => {
+    return async (dispatch, getState) => { //Not only do we get access to the dispatch function with thunk but we also get access to the state with the getState function
 
-        const response = await fetch(`https://rn-shop-app-e69b1.firebaseio.com/products/${id}.json`, { //the .json you have to add at the end is just a Firebase specific thing
+        const token = getState().auth.token
+
+        //here you can execute any async code you want!
+
+        const response = await fetch(`https://rn-shop-app-e69b1.firebaseio.com/products/${id}.json?auth=${token}`, { //the .json you have to add at the end is just a Firebase specific thing
             method: 'PATCH', //PUT will fully overwright the resource with the new data, but PATCH will update it in the places where you tell it to update it.
             header: {
                 'Content-Type': 'application/json'
@@ -103,10 +127,13 @@ export const editProduct = (id, title, imageUrl, description, price) => {
             throw new Error('Something went wrong!')
         }
 
-
-        dispatch ({ type: EDIT_PRODUCT, id: id, title: title, imageUrl: imageUrl, description: description, price: price })
+        dispatch ({
+            type: EDIT_PRODUCT,
+            id: id,
+            title: title,
+            imageUrl: imageUrl,
+            description: description,
+            price: price
+        })
     }
-
-
-
 }

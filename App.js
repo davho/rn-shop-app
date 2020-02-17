@@ -1,10 +1,14 @@
 //DO: expo install react-navigation react-navigation-drawer react-navigation-tabs react-navigation-stack react-native-gesture-handler react-native-reanimated react-native-screens react-native-safe-area-context @react-native-community/masked-view
 
-//DO: npm install --save react-navigation-header-buttons react-navigation-material-bottom-tabs react-native-paper redux react-redux redux-thunk
+//DO: npm install --save react-navigation-header-buttons react-navigation-material-bottom-tabs react-native-paper
+
+//DO: npm install --save redux react-redux redux-thunk
 
 //DO: npm install --save-dev redux-devtools-extension FOR REDUX DEVTOOLS, FOR WHICH THE IMPORT composeWithDevTools WILL BE REMOVED BEFORE DEPLOYMENT
 
 //DO: npm install --save moment (this is to parse dates for Android because Android deals with the JavaScript date object differently than iOS)
+
+//DO: expo install expo-linear-gradient
 
 //Note: enableScreens from 'react-native-screens' (it used to be called useScreens) is a package you download when you import react-navigation and the rest and it makes use of the native screen animations for better navigation performance. To use it simply import it into App.js and then call it before your App.js component. THIS MAKE NAVIGATION NOTICEABLY MORE PERFORMANT
 
@@ -23,7 +27,7 @@ import ReduxThunk from 'redux-thunk'
 
 //import { composeWithDevTools } from 'redux-devtools-extension' //THIS IMPORT IS FOR REDUX DEVTOOLS ONLY!!! REMOVE BEFORE DEPLOYMENT!!!
 
-import EntireNavigator from './src/navigation/EntireNavigator'
+import NavigationContainer from './src/navigation/NavigationContainer'
 
 
 
@@ -42,15 +46,16 @@ import EntireNavigator from './src/navigation/EntireNavigator'
 import productsReducer from './src/store/reducers/products' //IMPORT YOUR REDUCERS INTO YOUR APP.JS AND COMBINE THEM, IMPORT YOUR ACTIONS IN YOUR REDUCERS FILES AND IN YOUR COMPONENT FILES
 import cartReducer from './src/store/reducers/cart'
 import ordersReducer from './src/store/reducers/orders'
+import authReducer from './src/store/reducers/auth'
 
 const rootReducer = combineReducers({
     products: productsReducer,
     cart: cartReducer,
-    orders: ordersReducer
+    orders: ordersReducer,
+    auth: authReducer
 })
 
 const store = createStore(rootReducer, applyMiddleware(ReduxThunk)) //THE composeWithDevTools() ARGUMENT IS FOR REDUX DEVTOOLS ONLY!!! REMOVE BEFORE DEPLOYMENT!!!
-
 
 
 
@@ -89,7 +94,7 @@ const App = () => {
 
   return (
     <Provider store={store}>
-        <EntireNavigator />
+        <NavigationContainer />
     </Provider>
   )
 }

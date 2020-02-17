@@ -24,12 +24,12 @@ const ProductsOverviewScreen = props => {
     }
 
     useEffect(() => {
-        console.log('enter products overview screen')
+        //console.log('enter products overview screen')
         loadingProducts()
     }, [dispatch, isLoading])
 
     useEffect(() => {
-        console.log('re-enter products overview screen')
+        //console.log('re-enter products overview screen')
         const willFocusSub = props.navigation.addListener('willFocus', () => {
             loadingProducts()
         })

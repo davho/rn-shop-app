@@ -28,9 +28,17 @@ const EditProductScreen = props => {
 
     const dispatch = useDispatch()
 
-    const editOrAdd = async () => {
+    const editOrAddAndNavBack = (type) => { 
+        if (type === 'edit') {
+            dispatch(productsActions.editProduct(product.id, title, imageUrl, description, +price))
+        }
+        if (type === 'add') {
+            dispatch(productsActions.addProduct(title, imageUrl, description, +price))
+        }
+        props.navigation.goBack()
+    }
 
-        console.log(isLoading);
+    const editOrAddAlert = async () => {
 
         setError(null)
         setIsLoading(true)
@@ -49,7 +57,7 @@ const EditProductScreen = props => {
                     },
                     {text: 'OK',
                     style: 'destructive',
-                    onPress: () => {dispatch(productsActions.editProduct(product.id, title, imageUrl, description, +price)); props.navigation.goBack()}}
+                    onPress: () => editOrAddAndNavBack('edit')}
                   ],
                   {cancelable: false},
                 )
@@ -65,7 +73,8 @@ const EditProductScreen = props => {
                       onPress: () => console.log('Cancel Pressed'),
                       style: 'cancel',
                     },
-                    {text: 'OK', style: 'destructive', onPress: () => {dispatch(productsActions.addProduct(title, imageUrl, description, +price)); props.navigation.goBack()}},
+                    {text: 'OK', style: 'destructive',
+                    onPress: () => editOrAddAndNavBack('add')}
                   ],
                   {cancelable: false},
                 )
@@ -78,8 +87,8 @@ const EditProductScreen = props => {
 
     //props.navigation.setParams({updateOrCreateProduct: updateOrCreateProduct})
 
-    useEffect(() => { //If we don't wrap the passing of our editOrAdd function in a useEffect that only renders once we'll have an infinite loop
-        props.navigation.setParams({editOrAdd: editOrAdd, dispatch: dispatch})
+    useEffect(() => { //If we don't wrap the passing of our editOrAddAlert function in a useEffect that only renders once we'll have an infinite loop
+        props.navigation.setParams({editOrAddAlert: editOrAddAlert, dispatch: dispatch})
     },[dispatch, product, title, imageUrl, description, price])
 
 
@@ -144,7 +153,7 @@ const EditProductScreen = props => {
                             value={description}
                             onChangeText={text => setDescription(text)}
                             ref={ input => {inputs['four'] = input}}
-                            onSubmitEditing={() => editOrAdd()}
+                            onSubmitEditing={() => editOrAddAlert()}
                             returnKeyType='done'
                             multiline
                             />
@@ -152,19 +161,18 @@ const EditProductScreen = props => {
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
-
     )
 }
 
 EditProductScreen.navigationOptions = navData => {
 
-    const editOrAdd = navData.navigation.getParam('editOrAdd')
+    const editOrAddAlert = navData.navigation.getParam('editOrAddAlert')
 
     return (
         {
             headerTitle: navData.navigation.getParam('id') ? 'Edit Product' : 'Add Product',
             headerRight: () => <HeaderButtons HeaderButtonComponent={HeaderButton}>
-                <Item title='Save' iconName='md-checkmark' onPress={() => editOrAdd()}/>
+                <Item title='Save' iconName='md-checkmark' onPress={() => editOrAddAlert()}/>
             </HeaderButtons>
         }
     )

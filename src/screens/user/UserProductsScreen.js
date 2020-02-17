@@ -1,5 +1,5 @@
 import React from 'react'
-import { FlatList, StyleSheet, Button, View, Alert } from 'react-native'
+import { FlatList, StyleSheet, Button, View, Text, Alert } from 'react-native'
 import { useSelector, useDispatch } from 'react-redux'
 
 import { HeaderButtons, Item } from 'react-navigation-header-buttons'
@@ -31,6 +31,14 @@ const UserProductsScreen = props => {
             {text: 'OK', style: 'destructive', onPress: () => dispatch(productsActions.deleteProduct(id)) }
           ],
           {cancelable: false},
+        )
+    }
+
+    if (userProducts.length === 0) { //This has to be here otherwise FlatList will give you the error: Each child in a list should have a unique "key" prop.
+        return (
+            <View style={styles.centeredInScreen}>
+                <Text>No products found, maybe start creating some.</Text>
+            </View>
         )
     }
 
@@ -76,6 +84,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         height: '25%',
         paddingHorizontal: 20
+    },
+    centeredInScreen: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center'
     }
 })
 

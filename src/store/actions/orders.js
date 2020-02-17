@@ -8,9 +8,11 @@ export const SET_ORDERS = 'SET_ORDERS'
 
 export const fetchOrders = () => {
 
-    return async dispatch => {
+    return async (dispatch, getState) => { //Not only do we get access to the dispatch function with thunk but we also get access to the state with the getState function
 
-    const response = await fetch('https://rn-shop-app-e69b1.firebaseio.com/orders/u1.json') //the .json you have to add at the end is just a Firebase specific thing, and unlike our addProduct POST request, we don't even need the seconds argument in the fetch (the object with the method, header, and body)
+    const userId = getState().auth.userId
+
+    const response = await fetch(`https://rn-shop-app-e69b1.firebaseio.com/orders/${userId}.json`) //the .json you have to add at the end is just a Firebase specific thing, and unlike our addProduct POST request, we don't even need the seconds argument in the fetch (the object with the method, header, and body)
 
     if (!response.ok) { //In addition to being in a try catch, we can use 'ok' which is a property of the response object which is specific to fetch, and throw an error if 'ok' is not in the 200 status code range. Not necesary, but helps to handle network request errors where the request can't even leave the device.
         throw new Error('Something went wrong') //You could also dive into the response body and throw whatever is there too
@@ -40,10 +42,14 @@ export const addOrder = (cartItems, totalAmount) => {
     //     orderData: {items: cartItems, amount: totalAmount}
     // }
 
-    return async dispatch => {
-        //Now put any async code you want in here
+    return async (dispatch, getState) => { //Not only do we get access to the dispatch function with thunk but we also get access to the state with the getState function
 
-        const response = await fetch('https://rn-shop-app-e69b1.firebaseio.com/orders/u1.json', { // (the .json you have to add at the end is just a Firebase specific thing) and we're hard coding the u1 user for now
+        const token = getState().auth.token
+        const userId = getState().auth.userId
+
+        //here you can execute any async code you want!
+
+        const response = await fetch(`https://rn-shop-app-e69b1.firebaseio.com/orders/${userId}.json?auth=${token}`, { // (the .json you have to add at the end is just a Firebase specific thing) and we're hard coding the u1 user for now
             method: 'POST',
             header: {
                 'Content-Type': 'application/json'
